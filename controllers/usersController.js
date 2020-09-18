@@ -53,7 +53,7 @@ module.exports = {
         await db.User.findOneAndUpdate(
           { 'userData.userName': req.params.id1 },
           { 'userData.sessionToken': token },
-          { new: true }    //You should set the new option to true to return the document after update was applied.
+          { new: true }    //Set new option to true to return the document AFTER update was applied.
         )
           .then(result => res.json(result.userData))
       } else {
@@ -113,8 +113,11 @@ module.exports = {
       'userData.park': req.body.userData.park,
       'userData.ball': req.body.userData.ball,
       'userData.frisbee': req.body.userData.frisbee,
+      'userData.vaccinated': req.body.userData.vaccinated,
+      'userData.trained': req.body.userData.trained,
       'userData.email': req.body.userData.email,
-      'userData.photoUrl': req.body.userData.photoUrl,
+      'userData.petPhotoUrl': req.body.userData.petPhotoUrl,
+      'userData.userPhotoUrl': req.body.userData.userPhotoUrl,
       'userData.info': req.body.userData.info,
       'userData.zipCode': req.body.userData.zipCode,
       'userData.city': req.body.userData.city
@@ -161,13 +164,36 @@ module.exports = {
     await db.User.updateOne(filter,
       { $set: { 'userData.matchesYes': newMatchesYes } }
     )
-      .then(result => res.json("Your Match Choice has been saved"))
+      .then(result => res.json("Your - Swiped Yes - Match Choice has been saved"))
       .catch(err => res.status(422).json(err));
   },
-  ///////////////////////////////////////////////////////////////
+  
+ ///////////////////////////////////////////////////////////////////
+ updateMatchesNoByName: async function (req, res) {
+  console.log("id1", req.params.id1);
+  console.log("id2", req.params.id2);
+  // console.log("req", req.body);
+  let account = await db.User
+                .findOne({ 'userData.userName': req.params.id1});   // To update by user name
+  // let account = await db.User
+  //   .findOne({ '_id': req.params.id1 });    // To update by user id
+  console.log("account", account);
+  let oldMatchesNo = account.userData.matchesNo;
+  console.log("oldMatchesNo", oldMatchesNo);
+  var newMatchesNo = oldMatchesNo.concat(req.params.id2);
+  console.log("updated", newMatchesNo);
+  // const filter = { '_id': req.params.id1 };    // updating by user id
+   const filter = { 'userData.userName': req.params.id1 };  //updating by user name    
+  await db.User.updateOne(filter,
+    { $set: { 'userData.matchesNo': newMatchesNo } }
+  )
+    .then(result => res.json("Your - Swiped No - Match Choice has been saved"))
+    .catch(err => res.status(422).json(err));
+},
 
-  getMatchesByName: async function (req, res) {
-    console.log("getMatchesByName");
+///////////////////////////////////////////////////////////////
+  getMatchesYesByName: async function (req, res) {
+    console.log("getMatchesYesByName");
     console.log("query", req.params.id1);
     //To Find by userName
     let account = await db.User 
@@ -175,15 +201,14 @@ module.exports = {
     // let account = await db.User
     //   .findOne({ '_id': req.params.id1 })
     console.log("account", account)
-    let matchedUsers = account.userData.matchesYes;
-    console.log("MatchYes", matchedUsers);
+    let matchedYesUsers = account.userData.matchesYes;
+    console.log("MatchYes", matchedYesUsers);
     await db.User.find({
         "userData.userName": {
-        $in: matchedUsers
+        $in: matchedYesUsers
         }
     })
       // .then(result => res.json(result))
-      // .sort({"userData.city":1})
       .then(result => {
         let keys_to_keep = ['userData']
         const result2 = result.map(e => {
@@ -196,19 +221,51 @@ module.exports = {
       })
       .catch(err => res.status(422).json(err));
 
-    // for (i = 0; i < matchedUsers.length; i++) {
-    //     console.log(matchedUsers[i]);
+    // for (i = 0; i < matchedYesUsers.length; i++) {
+    //     console.log(matchedYesUsers[i]);
     //     let matchAccount = await db.User    
-    //       .findOne({ '_id': matchedUsers[i]}) 
+    //       .findOne({ '_id': matchedYesUsers[i]}) 
     //       .then(result => res.json(result))
     //       .catch(err => res.status(422).json(err));
-    //     // matchedUsersData = matchedUsersData.concat(matchAccount);
+    //     // matchedYesUsersData = matchedYesUsersData.concat(matchAccount);
     // }
     // // console.log(matchedUsersData); 
 
   },
 
-////////////////////////////////////////
+///////////////////////////////////////////////////////////////
+getMatchesNoByName: async function (req, res) {
+  console.log("getMatchesNoByName");
+  console.log("query", req.params.id1);
+  //To Find by userName
+  let account = await db.User 
+   .findOne({ 'userData.userName': req.params.id1})
+  // let account = await db.User
+  //   .findOne({ '_id': req.params.id1 })
+  console.log("account", account)
+  let matchedNoUsers = account.userData.matchesNo;
+  console.log("MatchNo", matchedNoUsers);
+  await db.User.find({
+      "userData.userName": {
+      $in: matchedNoUsers
+      }
+  })
+    // .then(result => res.json(result))
+    .then(result => {
+      let keys_to_keep = ['userData']
+      const result2 = result.map(e => {
+        const obj = {};
+        keys_to_keep.forEach(k => obj[k] = e[k])
+        return obj;
+      });
+      console.log("result2", result2);
+      res.json(result2);
+    })
+    .catch(err => res.status(422).json(err));
+},
+
+////////////////////////////////////////////////////////////////
+
   getSessionToken: async function (req, res) {
     console.log("getSessionToken", req)
     if (req){
@@ -224,31 +281,6 @@ module.exports = {
   
 //////////////////////////////////////////////////////////////////////
  
-// await db.User.findOneAndUpdate(
-//     filter, updatedUser,
-//     {new: true}    //You should set the new option to true to return the document after update was applied.    
-//   )
-// .then(result => res.json(result.userData))
-// .catch(err => res.status(422).json(err));
-// }
-
-  // update: function(req, res) {
-  //   db.Post.findOneAndUpdate({ _id: req.params.id }, req.body)
-  //     .then(dbModel => res.json(dbModel))
-  //     .catch(err => res.status(422).json(err));
-  // },
-
-  // db.Post.find(req.query)
-  //   .sort({ date: -1 })
-  //   .then(dbModel => res.json(dbModel))
-  //   .catch(err => res.status(422).json(err));
-// }
-
-  // update: function(req, res) {
-    //   db.Post.findOneAndUpdate({ _id: req.params.id }, req.body)
-  //     .then(dbModel => res.json(dbModel))
-  //     .catch(err => res.status(422).json(err));
-  // },
   // remove: function(req, res) {
   //   db.Post.findById({ _id: req.params.id })
   //     .then(dbModel => dbModel.remove())

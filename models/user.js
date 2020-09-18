@@ -3,8 +3,6 @@ const Schema = mongoose.Schema;
 
 const usersSchema = new Schema({
   // title: { type: String, required: true },
-  // author: { type: String, required: true },
-  // body: String,
   password: String,
   salt: String,
   userData: {
@@ -13,18 +11,21 @@ const usersSchema = new Schema({
     petName:  String,
     breed: String,
     age: Number,
-    park: String,
-    ball: String,
-    frisbee: String,
+    park: Boolean,
+    ball: Boolean,
+    frisbee: Boolean,
+    vaccinated: Boolean,
+    trained: Boolean,
     email: String,
-    photoUrl: String,
+    petPhotoUrl: String,
+    userPhotoUrl: String,
     info: String,
     zipCode: String,
     city: String,
     matchesYes: [],
+    matchesNo: [],
     date: { type: Date, default: Date.now }
   }
-
 });
 
 const User = mongoose.model("Users", usersSchema);
