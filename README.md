@@ -30,7 +30,10 @@ Introducing the new and improved Canine Cupid, this application builds up Canine
 ---
 
 ## Credits
-
+- Logan McCann
+- Dmitrii Z
+- Isha Bali
+- Carlos Reyes
 ---
 
 ## License
