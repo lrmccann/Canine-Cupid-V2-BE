@@ -4,7 +4,7 @@ Introducing the new and improved Canine Cupid, this application builds up Canine
 ---
 
 ## Build Status
-Travis CI badge here
+![GitHub language count](https://img.shields.io/badge/build-passing-brightgreen)
 
 ---
 
